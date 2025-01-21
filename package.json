@@ -1,0 +1,53 @@
+{
+    "name": "encryption-decryption-app",
+    "version": "1.0.0",
+    "description": "A simple encryption and decryption app made for my computer science class",
+    "type": "module",
+    "author": {
+        "name": "Jonas F. Franke <@binary-blazer>",
+        "email": "me@binaryblazer.me",
+        "url": "https://binaryblazer.me"
+    },
+    "homepage": "https://github.com/binary-blazer/encryption-decryption-app",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/binary-blazer/encryption-decryption-app.git"
+    },
+    "bugs": {
+        "url": "https://github.com/binary-blazer/encryption-decryption-app/issues"
+    },
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "tauri": "tauri",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "keywords": [
+        "encryption",
+        "decryption",
+        "app",
+        "tauri",
+        "react"
+    ],
+    "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^6.7.2",
+        "@fortawesome/free-solid-svg-icons": "^6.7.2",
+        "@fortawesome/react-fontawesome": "^0.2.2",
+        "@tauri-apps/api": "^2",
+        "@tauri-apps/plugin-opener": "^2",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@tauri-apps/cli": "^2",
+        "@types/react": "^18.3.1",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "prettier": "^3.4.2",
+        "typescript": "~5.6.2",
+        "vite": "^6.0.3"
+    }
+}
