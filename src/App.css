@@ -177,7 +177,12 @@ button {
 @media (prefers-color-scheme: dark) {
     :root {
         color: #f6f6f6;
-        background: linear-gradient(135deg, #2f2f2f 0%, #1a1a1a 50%, #000000 100%);
+        background: linear-gradient(
+            135deg,
+            #2f2f2f 0%,
+            #1a1a1a 50%,
+            #000000 100%
+        );
         background-attachment: fixed;
     }
 
@@ -204,7 +209,9 @@ button {
 .fade-enter-active {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.5s, transform 0.5s;
+    transition:
+        opacity 0.5s,
+        transform 0.5s;
 }
 
 .fade-exit {
@@ -215,7 +222,9 @@ button {
 .fade-exit-active {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s, transform 0.5s;
+    transition:
+        opacity 0.5s,
+        transform 0.5s;
 }
 
 .shift-selector {
@@ -231,6 +240,26 @@ button {
 }
 
 .shift-selector select {
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #3f3f3f;
+    color: #f6f6f6;
+    border: 1px solid #555;
+}
+
+.rails-selector {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rails-selector label {
+    font-size: 1em;
+    color: #f6f6f6;
+}
+
+.rails-selector select {
     padding: 5px;
     border-radius: 5px;
     background-color: #3f3f3f;
