@@ -7,7 +7,6 @@ import {
     faKey,
     faTh,
 } from "@fortawesome/free-solid-svg-icons";
-import "./App.css";
 
 const encryptionMethods = [
     { name: "Gartenzaun", icon: faWaveSquare },
@@ -224,43 +223,44 @@ function App() {
     }
 
     return (
-        <main className="container">
-            <div className="flex-row">
-                <div className="column sidebar">
-                    <h2>Select Encryption Method</h2>
-                    <div className="tabs">
+        <main className="container mx-auto p-4 bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white rounded-lg">
+            <div className="flex flex-col md:flex-row">
+                <div className="md:w-1/4 p-4 bg-gray-900 rounded-l-lg shadow-lg">
+                    <h2 className="text-xl font-bold mb-4">Select Encryption Method</h2>
+                    <div className="flex flex-col space-y-2">
                         {encryptionMethods.map((method) => (
                             <button
                                 key={method.name}
-                                className={`tab ${encryptionMethod === method.name ? "active" : ""}`}
+                                className={`py-2 px-4 rounded-lg shadow-md transition-colors duration-300 ${encryptionMethod === method.name ? "bg-gray-700" : "bg-gray-600 hover:bg-gray-700"}`}
                                 onClick={() => setEncryptionMethod(method.name)}
                             >
-                                <FontAwesomeIcon icon={method.icon} />{" "}
+                                <FontAwesomeIcon icon={method.icon} className="mr-2" />{" "}
                                 {method.name}
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="column content">
-                    <h2>Encryption Method: {encryptionMethod}</h2>
-                    <p>
+                <div className="md:w-3/4 p-4 bg-gray-900 rounded-r-lg shadow-lg">
+                    <h2 className="text-xl font-bold mb-4">Encryption Method: {encryptionMethod}</h2>
+                    <p className="mb-4">
                         Information about {encryptionMethod} encryption method.
                     </p>
                     {encryptionMethod === "Polybios" && (
                         <div>
-                            <h3>Polybios Matrix:</h3>
-                            <pre>{JSON.stringify(polybiosMatrix, null, 2)}</pre>
+                            <h3 className="text-lg font-semibold mb-2">Polybios Matrix:</h3>
+                            <pre className="bg-gray-800 p-2 rounded-lg">{JSON.stringify(polybiosMatrix, null, 2)}</pre>
                         </div>
                     )}
                     {encryptionMethod === "Cäsar" && (
-                        <div className="shift-selector">
-                            <label htmlFor="shift">Shift:</label>
+                        <div className="flex items-center mb-4">
+                            <label htmlFor="shift" className="mr-2">Shift:</label>
                             <select
                                 id="shift"
                                 value={caesarShift}
                                 onChange={(e) =>
                                     setCaesarShift(parseInt(e.target.value))
                                 }
+                                className="p-2 bg-gray-800 rounded-lg"
                             >
                                 {Array.from(
                                     { length: 25 },
@@ -274,14 +274,15 @@ function App() {
                         </div>
                     )}
                     {encryptionMethod === "Gartenzaun" && (
-                        <div className="shift-selector">
-                            <label htmlFor="rails">Zäune/Rows:</label>
+                        <div className="flex items-center mb-4">
+                            <label htmlFor="rails" className="mr-2">Zäune/Rows:</label>
                             <select
                                 id="rails"
                                 value={numRails}
                                 onChange={(e) =>
                                     setNumRails(parseInt(e.target.value))
                                 }
+                                className="p-2 bg-gray-800 rounded-lg"
                             >
                                 {Array.from(
                                     { length: 10 },
@@ -295,45 +296,46 @@ function App() {
                         </div>
                     )}
                     {encryptionMethod === "Vigenere" && (
-                        <div className="vigenere-key-selector">
-                            <label htmlFor="vigenere-key">Key:</label>
+                        <div className="flex items-center mb-4">
+                            <label htmlFor="vigenere-key" className="mr-2">Key:</label>
                             <input
                                 id="vigenere-key"
                                 type="text"
                                 value={vigenereKey}
                                 onChange={(e) => setVigenereKey(e.target.value)}
+                                className="p-2 bg-gray-800 rounded-lg"
                             />
                         </div>
                     )}
-                    <div className="input-output-container">
+                    <div className="flex items-center mb-4">
                         <textarea
-                            className="input-text"
+                            className="w-full p-2 bg-gray-800 rounded-lg"
                             placeholder="Enter text to encrypt/decrypt"
                             value={inputText}
                             onChange={(e) => setInputText(e.target.value)}
                         />
                         <FontAwesomeIcon
                             icon={faArrowRight}
-                            className="arrow-icon"
+                            className="mx-2 text-white"
                         />
                         <textarea
-                            className="output-text"
+                            className="w-full p-2 bg-gray-800 rounded-lg"
                             placeholder="Output"
                             value={outputText}
                             readOnly
                         />
                     </div>
-                    <div className="button-container">
-                        <button onClick={handleEncrypt}>Encrypt</button>
-                        <button onClick={handleDecrypt}>Decrypt</button>
+                    <div className="flex justify-center space-x-2 mb-4">
+                        <button onClick={handleEncrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Encrypt</button>
+                        <button onClick={handleDecrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Decrypt</button>
                         {(encryptionMethod === "Gartenzaun" || encryptionMethod === "Cäsar") && (
-                            <button onClick={handleBulkDecrypt}>Bulk Decrypt</button>
+                            <button onClick={handleBulkDecrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Bulk Decrypt</button>
                         )}
                     </div>
                     {bulkDecryptResults && (
-                        <div className="bulk-decrypt-results">
-                            <h3>Bulk Decrypt Results:</h3>
-                            <pre>{bulkDecryptResults}</pre>
+                        <div className="bg-gray-800 p-4 rounded-lg shadow-md">
+                            <h3 className="text-lg font-semibold mb-2">Bulk Decrypt Results:</h3>
+                            <pre className="whitespace-pre-wrap">{bulkDecryptResults}</pre>
                         </div>
                     )}
                 </div>
