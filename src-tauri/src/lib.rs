@@ -1,34 +1,71 @@
-use tauri_plugin_dialog;
-
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use tauri::ipc::Response;
+use tauri_plugin_dialog::{DialogExt, MessageDialogButtons};
+use tauri_plugin_updater::UpdaterExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
-        .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
-            let handle = app.handle();
+            let handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                let updater = handle.updater();
-                if let Ok(update) = updater.check().await {
-                    if update.is_update_available() {
-                        tauri_plugin_dialog::message(Some(&handle), "Update Available", "A new update is available. Would you like to update now?");
-                        if let Ok(_) = updater.install().await {
-                            tauri_plugin_dialog::message(Some(&handle), "Update Installed", "The update was installed successfully. Please restart the application.");
-                        } else {
-                            tauri_plugin_dialog::message(Some(&handle), "Update Failed", "The update failed to install.");
-                        }
-                    }
-                }
+                update(handle).await.unwrap();
             });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+async fn update(app: tauri::AppHandle) -> tauri_plugin_updater::Result<()> {
+    if let Some(update) = app.updater()?.check().await? {
+        let response = app
+            .dialog()
+            .message("Update Available")
+            .title("An update is available. Do you want to update now?")
+            .buttons(MessageDialogButtons::OkCancelCustom(
+                "Yes".to_string(),
+                "No".to_string(),
+            ))
+            .show(|response| async move {
+                if response == "Yes" {
+                    let mut downloaded = 0;
+
+                    update
+                        .download_and_install(
+                            |chunk_length, content_length| {
+                                downloaded += chunk_length;
+                                tauri::async_runtime::spawn(async move {
+                                    app.dialog()
+                                        .message("Downloading")
+                                        .title(&format!(
+                                            "Downloaded {} from {:?}",
+                                            downloaded, content_length
+                                        ))
+                                        .buttons(MessageDialogButtons::Ok)
+                                        .show(|_| ());
+                                }).await;
+                            },
+                            || async {
+                                app.dialog()
+                                    .message("Download Finished")
+                                    .title("The download has finished.")
+                                    .buttons(MessageDialogButtons::Ok)
+                                    .show(|_| ())
+                                    .await;
+                            },
+                        )
+                        .await
+                        .map_err(|e| e.to_string())?;
+
+                    app.dialog()
+                        .message("Update Installed")
+                        .title("The update has been installed. The application will now restart.")
+                        .buttons(MessageDialogButtons::Ok)
+                        .show(|_| ());
+                    app.restart();
+                }
+            });
+    }
+
+    Ok(())
 }
