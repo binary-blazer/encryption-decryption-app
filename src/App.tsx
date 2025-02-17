@@ -4,12 +4,14 @@ import {
     faArrowRight,
     faWaveSquare,
     faFont,
+    faKey,
 } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 
 const encryptionMethods = [
     { name: "Gartenzaun", icon: faWaveSquare },
     { name: "Cäsar", icon: faFont },
+    { name: "Vigenere", icon: faKey },
 ];
 
 function caesarCipher(text: string, shift: number) {
@@ -65,6 +67,44 @@ function railFenceCipherDecrypt(text: string, numRails: number) {
     return result;
 }
 
+function vigenereCipherEncrypt(text: string, key: string) {
+    let result = "";
+    for (let i = 0, j = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char.match(/[a-z]/i)) {
+            const start = char <= "Z" ? 65 : 97;
+            const keyChar = key[j % key.length].toUpperCase();
+            const shift = keyChar.charCodeAt(0) - 65;
+            result += String.fromCharCode(
+                ((char.charCodeAt(0) - start + shift) % 26) + start,
+            );
+            j++;
+        } else {
+            result += char;
+        }
+    }
+    return result;
+}
+
+function vigenereCipherDecrypt(text: string, key: string) {
+    let result = "";
+    for (let i = 0, j = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char.match(/[a-z]/i)) {
+            const start = char <= "Z" ? 65 : 97;
+            const keyChar = key[j % key.length].toUpperCase();
+            const shift = keyChar.charCodeAt(0) - 65;
+            result += String.fromCharCode(
+                ((char.charCodeAt(0) - start - shift + 26) % 26) + start,
+            );
+            j++;
+        } else {
+            result += char;
+        }
+    }
+    return result;
+}
+
 function App() {
     const [encryptionMethod, setEncryptionMethod] = useState(
         encryptionMethods[0].name,
@@ -73,6 +113,7 @@ function App() {
     const [outputText, setOutputText] = useState("");
     const [caesarShift, setCaesarShift] = useState(3);
     const [numRails, setNumRails] = useState(2);
+    const [vigenereKey, setVigenereKey] = useState("");
 
     function handleEncrypt() {
         let result;
@@ -82,6 +123,9 @@ function App() {
                 break;
             case "Cäsar":
                 result = caesarCipher(inputText, caesarShift);
+                break;
+            case "Vigenere":
+                result = vigenereCipherEncrypt(inputText, vigenereKey);
                 break;
             default:
                 result = inputText;
@@ -97,6 +141,9 @@ function App() {
                 break;
             case "Cäsar":
                 result = caesarCipher(inputText, -caesarShift);
+                break;
+            case "Vigenere":
+                result = vigenereCipherDecrypt(inputText, vigenereKey);
                 break;
             default:
                 result = inputText;
@@ -149,7 +196,7 @@ function App() {
                         </div>
                     )}
                     {encryptionMethod === "Gartenzaun" && (
-                        <div className="rails-selector">
+                        <div className="shift-selector">
                             <label htmlFor="rails">Zäune/Rows:</label>
                             <select
                                 id="rails"
@@ -167,6 +214,19 @@ function App() {
                                     </option>
                                 ))}
                             </select>
+                        </div>
+                    )}
+                    {encryptionMethod === "Vigenere" && (
+                        <div className="vigenere-key-selector">
+                            <label htmlFor="vigenere-key">Key:</label>
+                            <input
+                                id="vigenere-key"
+                                type="text"
+                                value={vigenereKey}
+                                onChange={(e) =>
+                                    setVigenereKey(e.target.value)
+                                }
+                            />
                         </div>
                     )}
                     <div className="input-output-container">

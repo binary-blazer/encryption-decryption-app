@@ -1,6 +1,6 @@
 {
     "name": "encryption-decryption-app",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "description": "A simple encryption and decryption app made for my computer science class",
     "type": "module",
     "author": {
