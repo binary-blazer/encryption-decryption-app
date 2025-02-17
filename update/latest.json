@@ -1,0 +1,10 @@
+{
+    "version": "v1.2.0",
+    "notes": "Bug fixes, new features, and improvements!",
+    "pub_date": "2025-02-17T19:49:00Z",
+    "platforms": {
+      "windows-x86_64": {
+        "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdGMDI4RUIzOTQxRUMzMUEKUldRYXd4NlVzNDRDZjhZc3BXUTEwM3dtVDlZTm1Bd2pvVzNxMEpNYTZYT0lBQi9SQ1R5eUNUZVQK"
+      }
+    }
+}
