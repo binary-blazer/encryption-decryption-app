@@ -5,6 +5,7 @@ import {
     faWaveSquare,
     faFont,
     faKey,
+    faTh,
 } from "@fortawesome/free-solid-svg-icons";
 import "./App.css";
 
@@ -12,6 +13,15 @@ const encryptionMethods = [
     { name: "Gartenzaun", icon: faWaveSquare },
     { name: "Cäsar", icon: faFont },
     { name: "Vigenere", icon: faKey },
+    { name: "Polybios", icon: faTh },
+];
+
+const polybiosMatrix = [
+    ["A", "B", "C", "D", "E"],
+    ["F", "G", "H", "I", "K"],
+    ["L", "M", "N", "O", "P"],
+    ["Q", "R", "S", "T", "U"],
+    ["V", "W", "X", "Y", "Z"],
 ];
 
 function caesarCipher(text: string, shift: number) {
@@ -67,6 +77,22 @@ function railFenceCipherDecrypt(text: string, numRails: number) {
     return result;
 }
 
+function bulkCaesarDecrypt(text: string) {
+    const results = [];
+    for (let shift = 1; shift < 26; shift++) {
+        results.push(`Shift ${shift}: ${caesarCipher(text, -shift)}`);
+    }
+    return results.join("\n");
+}
+
+function bulkRailFenceDecrypt(text: string) {
+    const results = [];
+    for (let numRails = 2; numRails <= 10; numRails++) {
+        results.push(`Rails ${numRails}: ${railFenceCipherDecrypt(text, numRails)}`);
+    }
+    return results.join("\n");
+}
+
 function vigenereCipherEncrypt(text: string, key: string) {
     let result = "";
     for (let i = 0, j = 0; i < text.length; i++) {
@@ -105,6 +131,30 @@ function vigenereCipherDecrypt(text: string, key: string) {
     return result;
 }
 
+function polybiosEncrypt(text: string) {
+    const matrix = polybiosMatrix;
+    return text.toUpperCase().replace(/[A-Z]/g, (char) => {
+        if (char === "J") char = "I";
+        for (let i = 0; i < matrix.length; i++) {
+            for (let j = 0; j < matrix[i].length; j++) {
+                if (matrix[i][j] === char) {
+                    return `${i + 1}${j + 1}`;
+                }
+            }
+        }
+        return char;
+    });
+}
+
+function polybiosDecrypt(text: string) {
+    const matrix = polybiosMatrix;
+    return text.replace(/(\d\d)/g, (pair) => {
+        const row = parseInt(pair[0]) - 1;
+        const col = parseInt(pair[1]) - 1;
+        return matrix[row][col];
+    });
+}
+
 function App() {
     const [encryptionMethod, setEncryptionMethod] = useState(
         encryptionMethods[0].name,
@@ -114,6 +164,7 @@ function App() {
     const [caesarShift, setCaesarShift] = useState(3);
     const [numRails, setNumRails] = useState(2);
     const [vigenereKey, setVigenereKey] = useState("");
+    const [bulkDecryptResults, setBulkDecryptResults] = useState("");
 
     function handleEncrypt() {
         let result;
@@ -126,6 +177,9 @@ function App() {
                 break;
             case "Vigenere":
                 result = vigenereCipherEncrypt(inputText, vigenereKey);
+                break;
+            case "Polybios":
+                result = polybiosEncrypt(inputText);
                 break;
             default:
                 result = inputText;
@@ -145,10 +199,28 @@ function App() {
             case "Vigenere":
                 result = vigenereCipherDecrypt(inputText, vigenereKey);
                 break;
+            case "Polybios":
+                result = polybiosDecrypt(inputText);
+                break;
             default:
                 result = inputText;
         }
         setOutputText(result);
+    }
+
+    function handleBulkDecrypt() {
+        let results;
+        switch (encryptionMethod) {
+            case "Gartenzaun":
+                results = bulkRailFenceDecrypt(inputText);
+                break;
+            case "Cäsar":
+                results = bulkCaesarDecrypt(inputText);
+                break;
+            default:
+                results = "Bulk decryption not available for this method.";
+        }
+        setBulkDecryptResults(results);
     }
 
     return (
@@ -174,6 +246,12 @@ function App() {
                     <p>
                         Information about {encryptionMethod} encryption method.
                     </p>
+                    {encryptionMethod === "Polybios" && (
+                        <div>
+                            <h3>Polybios Matrix:</h3>
+                            <pre>{JSON.stringify(polybiosMatrix, null, 2)}</pre>
+                        </div>
+                    )}
                     {encryptionMethod === "Cäsar" && (
                         <div className="shift-selector">
                             <label htmlFor="shift">Shift:</label>
@@ -248,7 +326,16 @@ function App() {
                     <div className="button-container">
                         <button onClick={handleEncrypt}>Encrypt</button>
                         <button onClick={handleDecrypt}>Decrypt</button>
+                        {(encryptionMethod === "Gartenzaun" || encryptionMethod === "Cäsar") && (
+                            <button onClick={handleBulkDecrypt}>Bulk Decrypt</button>
+                        )}
                     </div>
+                    {bulkDecryptResults && (
+                        <div className="bulk-decrypt-results">
+                            <h3>Bulk Decrypt Results:</h3>
+                            <pre>{bulkDecryptResults}</pre>
+                        </div>
+                    )}
                 </div>
             </div>
         </main>
