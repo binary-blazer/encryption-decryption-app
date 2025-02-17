@@ -7,6 +7,8 @@ import {
     faKey,
     faTh,
 } from "@fortawesome/free-solid-svg-icons";
+import { motion, AnimatePresence } from "framer-motion";
+import "./App.css";
 
 const encryptionMethods = [
     { name: "Gartenzaun", icon: faWaveSquare },
@@ -15,13 +17,16 @@ const encryptionMethods = [
     { name: "Polybios", icon: faTh },
 ];
 
-const polybiosMatrix = [
-    ["A", "B", "C", "D", "E"],
-    ["F", "G", "H", "I", "K"],
-    ["L", "M", "N", "O", "P"],
-    ["Q", "R", "S", "T", "U"],
-    ["V", "W", "X", "Y", "Z"],
-];
+function generatePolybiosMatrix(key: string) {
+    const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+    const keyUpper = key.toUpperCase().replace(/J/g, "I");
+    const uniqueKey = Array.from(new Set(keyUpper + alphabet)).join("");
+    const matrix = [];
+    for (let i = 0; i < 5; i++) {
+        matrix.push(uniqueKey.slice(i * 5, i * 5 + 5).split(""));
+    }
+    return matrix;
+}
 
 function caesarCipher(text: string, shift: number) {
     return text.replace(/[a-z]/gi, (char) => {
@@ -87,7 +92,9 @@ function bulkCaesarDecrypt(text: string) {
 function bulkRailFenceDecrypt(text: string) {
     const results = [];
     for (let numRails = 2; numRails <= 10; numRails++) {
-        results.push(`Rails ${numRails}: ${railFenceCipherDecrypt(text, numRails)}`);
+        results.push(
+            `Rails ${numRails}: ${railFenceCipherDecrypt(text, numRails)}`,
+        );
     }
     return results.join("\n");
 }
@@ -130,8 +137,7 @@ function vigenereCipherDecrypt(text: string, key: string) {
     return result;
 }
 
-function polybiosEncrypt(text: string) {
-    const matrix = polybiosMatrix;
+function polybiosEncrypt(text: string, matrix: string[][]) {
     return text.toUpperCase().replace(/[A-Z]/g, (char) => {
         if (char === "J") char = "I";
         for (let i = 0; i < matrix.length; i++) {
@@ -145,8 +151,7 @@ function polybiosEncrypt(text: string) {
     });
 }
 
-function polybiosDecrypt(text: string) {
-    const matrix = polybiosMatrix;
+function polybiosDecrypt(text: string, matrix: string[][]) {
     return text.replace(/(\d\d)/g, (pair) => {
         const row = parseInt(pair[0]) - 1;
         const col = parseInt(pair[1]) - 1;
@@ -163,7 +168,18 @@ function App() {
     const [caesarShift, setCaesarShift] = useState(3);
     const [numRails, setNumRails] = useState(2);
     const [vigenereKey, setVigenereKey] = useState("");
+    const [polybiosKey, setPolybiosKey] = useState("");
     const [bulkDecryptResults, setBulkDecryptResults] = useState("");
+
+    function clearAll() {
+        setInputText("");
+        setOutputText("");
+        setCaesarShift(3);
+        setNumRails(2);
+        setVigenereKey("");
+        setPolybiosKey("");
+        setBulkDecryptResults("");
+    }
 
     function handleEncrypt() {
         let result;
@@ -178,7 +194,8 @@ function App() {
                 result = vigenereCipherEncrypt(inputText, vigenereKey);
                 break;
             case "Polybios":
-                result = polybiosEncrypt(inputText);
+                const polybiosMatrix = generatePolybiosMatrix(polybiosKey);
+                result = polybiosEncrypt(inputText, polybiosMatrix);
                 break;
             default:
                 result = inputText;
@@ -199,7 +216,8 @@ function App() {
                 result = vigenereCipherDecrypt(inputText, vigenereKey);
                 break;
             case "Polybios":
-                result = polybiosDecrypt(inputText);
+                const polybiosMatrix = generatePolybiosMatrix(polybiosKey);
+                result = polybiosDecrypt(inputText, polybiosMatrix);
                 break;
             default:
                 result = inputText;
@@ -223,121 +241,217 @@ function App() {
     }
 
     return (
-        <main className="container mx-auto p-4 bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white rounded-lg">
-            <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/4 p-4 bg-gray-900 rounded-l-lg shadow-lg">
-                    <h2 className="text-xl font-bold mb-4">Select Encryption Method</h2>
-                    <div className="flex flex-col space-y-2">
+        <main className="container">
+            <div className="flex-row">
+                <div className="column sidebar">
+                    <h2>Select Encryption Method</h2>
+                    <div className="tabs">
                         {encryptionMethods.map((method) => (
                             <button
                                 key={method.name}
-                                className={`py-2 px-4 rounded-lg shadow-md transition-colors duration-300 ${encryptionMethod === method.name ? "bg-gray-700" : "bg-gray-600 hover:bg-gray-700"}`}
+                                className={`tab ${encryptionMethod === method.name ? "active" : ""}`}
                                 onClick={() => setEncryptionMethod(method.name)}
                             >
-                                <FontAwesomeIcon icon={method.icon} className="mr-2" />{" "}
+                                <FontAwesomeIcon icon={method.icon} />{" "}
                                 {method.name}
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="md:w-3/4 p-4 bg-gray-900 rounded-r-lg shadow-lg">
-                    <h2 className="text-xl font-bold mb-4">Encryption Method: {encryptionMethod}</h2>
-                    <p className="mb-4">
-                        Information about {encryptionMethod} encryption method.
-                    </p>
-                    {encryptionMethod === "Polybios" && (
-                        <div>
-                            <h3 className="text-lg font-semibold mb-2">Polybios Matrix:</h3>
-                            <pre className="bg-gray-800 p-2 rounded-lg">{JSON.stringify(polybiosMatrix, null, 2)}</pre>
-                        </div>
-                    )}
-                    {encryptionMethod === "Cäsar" && (
-                        <div className="flex items-center mb-4">
-                            <label htmlFor="shift" className="mr-2">Shift:</label>
-                            <select
-                                id="shift"
-                                value={caesarShift}
-                                onChange={(e) =>
-                                    setCaesarShift(parseInt(e.target.value))
-                                }
-                                className="p-2 bg-gray-800 rounded-lg"
+                <div className="column content">
+                    <h2>Encryption Method: {encryptionMethod}</h2>
+                    <AnimatePresence>
+                        {encryptionMethod === "Polybios" && (
+                            <motion.div
+                                key="Polybios"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
                             >
-                                {Array.from(
-                                    { length: 25 },
-                                    (_, i) => i + 1,
-                                ).map((shift) => (
-                                    <option key={shift} value={shift}>
-                                        {shift}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {encryptionMethod === "Gartenzaun" && (
-                        <div className="flex items-center mb-4">
-                            <label htmlFor="rails" className="mr-2">Zäune/Rows:</label>
-                            <select
-                                id="rails"
-                                value={numRails}
-                                onChange={(e) =>
-                                    setNumRails(parseInt(e.target.value))
-                                }
-                                className="p-2 bg-gray-800 rounded-lg"
-                            >
-                                {Array.from(
-                                    { length: 10 },
-                                    (_, i) => i + 2,
-                                ).map((rails) => (
-                                    <option key={rails} value={rails}>
-                                        {rails}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-                    {encryptionMethod === "Vigenere" && (
-                        <div className="flex items-center mb-4">
-                            <label htmlFor="vigenere-key" className="mr-2">Key:</label>
-                            <input
-                                id="vigenere-key"
-                                type="text"
-                                value={vigenereKey}
-                                onChange={(e) => setVigenereKey(e.target.value)}
-                                className="p-2 bg-gray-800 rounded-lg"
-                            />
-                        </div>
-                    )}
-                    <div className="flex items-center mb-4">
-                        <textarea
-                            className="w-full p-2 bg-gray-800 rounded-lg"
-                            placeholder="Enter text to encrypt/decrypt"
-                            value={inputText}
-                            onChange={(e) => setInputText(e.target.value)}
-                        />
-                        <FontAwesomeIcon
-                            icon={faArrowRight}
-                            className="mx-2 text-white"
-                        />
-                        <textarea
-                            className="w-full p-2 bg-gray-800 rounded-lg"
-                            placeholder="Output"
-                            value={outputText}
-                            readOnly
-                        />
-                    </div>
-                    <div className="flex justify-center space-x-2 mb-4">
-                        <button onClick={handleEncrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Encrypt</button>
-                        <button onClick={handleDecrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Decrypt</button>
-                        {(encryptionMethod === "Gartenzaun" || encryptionMethod === "Cäsar") && (
-                            <button onClick={handleBulkDecrypt} className="py-2 px-4 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition-colors duration-300">Bulk Decrypt</button>
+                                <h3>Polybios Matrix:</h3>
+                                {generatePolybiosMatrix(polybiosKey).map(
+                                    (row, i) => (
+                                        <div key={i} className="polybios-row">
+                                            {row.map((char, j) => (
+                                                <div
+                                                    key={j}
+                                                    className="polybios-cell"
+                                                >
+                                                    {char}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ),
+                                )}
+                                <div className="polybios-key-selector">
+                                    <label htmlFor="polybios-key">Key:</label>
+                                    <input
+                                        id="polybios-key"
+                                        type="text"
+                                        value={polybiosKey}
+                                        onChange={(e) =>
+                                            setPolybiosKey(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </motion.div>
                         )}
-                    </div>
-                    {bulkDecryptResults && (
-                        <div className="bg-gray-800 p-4 rounded-lg shadow-md">
-                            <h3 className="text-lg font-semibold mb-2">Bulk Decrypt Results:</h3>
-                            <pre className="whitespace-pre-wrap">{bulkDecryptResults}</pre>
-                        </div>
-                    )}
+                        {encryptionMethod === "Cäsar" && (
+                            <motion.div
+                                key="Cäsar"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="shift-selector">
+                                    <label htmlFor="shift">Shift:</label>
+                                    <select
+                                        id="shift"
+                                        value={caesarShift}
+                                        onChange={(e) =>
+                                            setCaesarShift(
+                                                parseInt(e.target.value),
+                                            )
+                                        }
+                                    >
+                                        {Array.from(
+                                            { length: 25 },
+                                            (_, i) => i + 1,
+                                        ).map((shift) => (
+                                            <option key={shift} value={shift}>
+                                                {shift}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </motion.div>
+                        )}
+                        {encryptionMethod === "Gartenzaun" && (
+                            <motion.div
+                                key="Gartenzaun"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="shift-selector">
+                                    <label htmlFor="rails">Zäune/Rows:</label>
+                                    <select
+                                        id="rails"
+                                        value={numRails}
+                                        onChange={(e) =>
+                                            setNumRails(
+                                                parseInt(e.target.value),
+                                            )
+                                        }
+                                    >
+                                        {Array.from(
+                                            { length: 10 },
+                                            (_, i) => i + 2,
+                                        ).map((rails) => (
+                                            <option key={rails} value={rails}>
+                                                {rails}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </motion.div>
+                        )}
+                        {encryptionMethod === "Vigenere" && (
+                            <motion.div
+                                key="Vigenere"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="vigenere-key-selector">
+                                    <label htmlFor="vigenere-key">Key:</label>
+                                    <input
+                                        id="vigenere-key"
+                                        type="text"
+                                        value={vigenereKey}
+                                        onChange={(e) =>
+                                            setVigenereKey(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                        <motion.div
+                            key="InputOutput"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="input-output-container"
+                        >
+                            <textarea
+                                className="input-text"
+                                placeholder="Enter text to encrypt/decrypt"
+                                value={inputText}
+                                onChange={(e) => setInputText(e.target.value)}
+                            />
+                            <FontAwesomeIcon
+                                icon={faArrowRight}
+                                className="arrow-icon"
+                            />
+                            <textarea
+                                className="output-text"
+                                placeholder="Output"
+                                value={outputText}
+                                readOnly
+                            />
+                        </motion.div>
+                        <motion.div
+                            key="Buttons"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="button-container"
+                        >
+                            <motion.button
+                                onClick={handleEncrypt}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                Encrypt
+                            </motion.button>
+                            <motion.button
+                                onClick={handleDecrypt}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                Decrypt
+                            </motion.button>
+                            {(encryptionMethod === "Gartenzaun" ||
+                                encryptionMethod === "Cäsar") && (
+                                <motion.button
+                                    onClick={handleBulkDecrypt}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                >
+                                    Bulk Decrypt
+                                </motion.button>
+                            )}
+                            <motion.button
+                                onClick={clearAll}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                Clear All
+                            </motion.button>
+                        </motion.div>
+                        {bulkDecryptResults && (
+                            <motion.div
+                                key="BulkDecryptResults"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="bulk-decrypt-results"
+                            >
+                                <h3>Bulk Decrypt Results:</h3>
+                                <pre>{bulkDecryptResults}</pre>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </main>
