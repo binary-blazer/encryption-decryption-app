@@ -29,6 +29,9 @@ jobs:
           toolchain: stable
           override: true
 
+      - name: Setup PNPM
+        run: pnpm setup
+
       - name: Install Tauri CLI
         run: pnpm add -g @tauri-apps/cli
 
