@@ -177,7 +177,12 @@ button {
 @media (prefers-color-scheme: dark) {
     :root {
         color: #f6f6f6;
-        background: linear-gradient(135deg, #2f2f2f 0%, #1a1a1a 50%, #000000 100%);
+        background: linear-gradient(
+            135deg,
+            #2f2f2f 0%,
+            #1a1a1a 50%,
+            #000000 100%
+        );
         background-attachment: fixed;
     }
 
@@ -204,7 +209,9 @@ button {
 .fade-enter-active {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.5s, transform 0.5s;
+    transition:
+        opacity 0.5s,
+        transform 0.5s;
 }
 
 .fade-exit {
@@ -215,7 +222,9 @@ button {
 .fade-exit-active {
     opacity: 0;
     transform: translateY(20px);
-    transition: opacity 0.5s, transform 0.5s;
+    transition:
+        opacity 0.5s,
+        transform 0.5s;
 }
 
 .shift-selector {

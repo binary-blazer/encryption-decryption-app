@@ -223,9 +223,7 @@ function App() {
                                 id="vigenere-key"
                                 type="text"
                                 value={vigenereKey}
-                                onChange={(e) =>
-                                    setVigenereKey(e.target.value)
-                                }
+                                onChange={(e) => setVigenereKey(e.target.value)}
                             />
                         </div>
                     )}
