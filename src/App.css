@@ -311,3 +311,23 @@ button {
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+.tapir-table {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.tapir-cell {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #555;
+    background-color: #3f3f3f;
+    color: #f6f6f6;
+    margin: 2px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

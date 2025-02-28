@@ -6,6 +6,7 @@ import {
     faFont,
     faKey,
     faTh,
+    faPaw,
 } from "@fortawesome/free-solid-svg-icons";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
@@ -15,6 +16,7 @@ const encryptionMethods = [
     { name: "Cäsar", icon: faFont },
     { name: "Vigenere", icon: faKey },
     { name: "Polybios", icon: faTh },
+    { name: "Tapir", icon: faPaw },
 ];
 
 function generatePolybiosMatrix(key: string) {
@@ -159,6 +161,41 @@ function polybiosDecrypt(text: string, matrix: string[][]) {
     });
 }
 
+const tapirTable = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
+    ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
+];
+
+function tapirEncrypt(text: string, key: string) {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+        const charIndex = tapirTable.indexOf(text[i]);
+        const keyIndex = tapirTable.indexOf(key[i % key.length]);
+        if (charIndex === -1 || keyIndex === -1) {
+            result += text[i];
+        } else {
+            result += tapirTable[(charIndex + keyIndex) % tapirTable.length];
+        }
+    }
+    return result;
+}
+
+function tapirDecrypt(text: string, key: string) {
+    let result = "";
+    for (let i = 0; i < text.length; i++) {
+        const charIndex = tapirTable.indexOf(text[i]);
+        const keyIndex = tapirTable.indexOf(key[i % key.length]);
+        if (charIndex === -1 || keyIndex === -1) {
+            result += text[i];
+        } else {
+            result += tapirTable[(charIndex - keyIndex + tapirTable.length) % tapirTable.length];
+        }
+    }
+    return result;
+}
+
 function App() {
     const [encryptionMethod, setEncryptionMethod] = useState(
         encryptionMethods[0].name,
@@ -169,6 +206,7 @@ function App() {
     const [numRails, setNumRails] = useState(2);
     const [vigenereKey, setVigenereKey] = useState("");
     const [polybiosKey, setPolybiosKey] = useState("");
+    const [tapirKey, setTapirKey] = useState("");
     const [bulkDecryptResults, setBulkDecryptResults] = useState("");
 
     function clearAll() {
@@ -178,6 +216,7 @@ function App() {
         setNumRails(2);
         setVigenereKey("");
         setPolybiosKey("");
+        setTapirKey("");
         setBulkDecryptResults("");
     }
 
@@ -196,6 +235,9 @@ function App() {
             case "Polybios":
                 const polybiosMatrix = generatePolybiosMatrix(polybiosKey);
                 result = polybiosEncrypt(inputText, polybiosMatrix);
+                break;
+            case "Tapir":
+                result = tapirEncrypt(inputText, tapirKey);
                 break;
             default:
                 result = inputText;
@@ -218,6 +260,9 @@ function App() {
             case "Polybios":
                 const polybiosMatrix = generatePolybiosMatrix(polybiosKey);
                 result = polybiosDecrypt(inputText, polybiosMatrix);
+                break;
+            case "Tapir":
+                result = tapirDecrypt(inputText, tapirKey);
                 break;
             default:
                 result = inputText;
@@ -372,6 +417,24 @@ function App() {
                                         onChange={(e) =>
                                             setVigenereKey(e.target.value)
                                         }
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                        {encryptionMethod === "Tapir" && (
+                            <motion.div
+                                key="Tapir"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                            >
+                                <div className="vigenere-key-selector">
+                                    <label htmlFor="tapir-key">Key:</label>
+                                    <input
+                                        id="tapir-key"
+                                        type="text"
+                                        value={tapirKey}
+                                        onChange={(e) => setTapirKey(e.target.value)}
                                     />
                                 </div>
                             </motion.div>
