@@ -1,3 +1,4 @@
+// Caeser encryption methods
 export function generatePolybiosMatrix(key: string) {
     const alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
     const keyUpper = key.toUpperCase().replace(/J/g, "I");
@@ -19,6 +20,7 @@ export function caesarCipher(text: string, shift: number) {
     });
 }
 
+// Rail Fence encryption methods
 export function railFenceCipherEncrypt(text: string, numRails: number) {
     if (numRails === 1) return text;
     const rail: string[][] = Array.from({ length: numRails }, () => []);
@@ -62,6 +64,7 @@ export function railFenceCipherDecrypt(text: string, numRails: number) {
     return result;
 }
 
+// Bulk encryption methods
 export function bulkCaesarDecrypt(text: string) {
     const results = [];
     for (let shift = 1; shift < 26; shift++) {
@@ -80,6 +83,7 @@ export function bulkRailFenceDecrypt(text: string) {
     return results.join("\n");
 }
 
+// Vigenere encryption method
 export function vigenereCipherEncrypt(text: string, key: string) {
     let result = "";
     for (let i = 0, j = 0; i < text.length; i++) {
@@ -118,8 +122,10 @@ export function vigenereCipherDecrypt(text: string, key: string) {
     return result;
 }
 
+// Polybios encryption method
 export function polybiosEncrypt(text: string, matrix: string[][]) {
-    return text.toUpperCase().replace(/[A-Z]/g, (char) => {
+    return text.toUpperCase().replace(/[A-Z\s]/g, (char) => {
+        if (char === " ") return " ";
         if (char === "J") char = "I";
         for (let i = 0; i < matrix.length; i++) {
             for (let j = 0; j < matrix[i].length; j++) {
@@ -129,46 +135,55 @@ export function polybiosEncrypt(text: string, matrix: string[][]) {
             }
         }
         return char;
-    });
+    }).match(/.{1,2}|\s/g)?.join(" ") || "";
 }
 
 export function polybiosDecrypt(text: string, matrix: string[][]) {
-    return text.replace(/(\d\d)/g, (pair) => {
-        const row = parseInt(pair[0]) - 1;
-        const col = parseInt(pair[1]) - 1;
-        return matrix[row][col];
-    });
+    let addSpace = false;
+    return text.replace(/(\d\d|\d \d|\s)/g, (pair) => {
+        if (pair.trim() === "") {
+            addSpace = true;
+            return "";
+        }
+        const cleanedPair = pair.replace(" ", "");
+        const row = parseInt(cleanedPair[0]) - 1;
+        const col = parseInt(cleanedPair[1]) - 1;
+        const char = matrix[row][col];
+        if (addSpace) {
+            addSpace = false;
+            return " " + char;
+        }
+        return char;
+    }).replace(/\s+/g, '');
 }
 
-const tapirTable = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
-    ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
-];
+// Tapir encryption method
+const tapirEncoding: Record<string, string> = {
+    "A": "0", "B": "50", "BE": "51", "C": "52", "CH": "53", "D": "54", "DE": "55",
+    "E": "1", "F": "56", "G": "57", "GE": "58", "H": "59", "I": "2", "J": "60",
+    "K": "61", "L": "62", "M": "63", "N": "3", "O": "64", "P": "67", "Q": "68",
+    "R": "4", "S": "69", "T": "70", "TE": "71", "U": "72", "UN": "73", "V": "74",
+    "W": "76", "X": "77", "Y": "78", "Z": "79", "Zi": "82", "ZwR": "83", "Ä": "66",
+    "ß": "65", "0": "00", "1": "11", "2": "22", "3": "33", "4": "44", "5": "55",
+    "6": "66", "7": "77", "8": "88", "9": "99", ".": "89", ":": "90", ",": "91",
+    "-": "92", "/": "93", "(": "94", ")": "95", "+": "96", "=": "97", "\"": "98",
+    "Leerzeichen": "83"
+};
 
-export function tapirEncrypt(text: string) {
-    let result = "";
-    for (let i = 0; i < text.length; i++) {
-        const charIndex = tapirTable.indexOf(text[i]);
-        if (charIndex === -1) {
-            result += text[i];
-        } else {
-            result += (charIndex + 1).toString().padStart(2, '0');
-        }
-    }
-    return result;
+const tapirDecoding: Record<string, string> = Object.fromEntries(
+    Object.entries(tapirEncoding).map(([key, value]) => [value, key])
+);
+
+export function tapirEncrypt(text: string): string {
+    return text.toUpperCase().split("").map(char => {
+        if (char === " ") return tapirEncoding["Leerzeichen"];
+        return tapirEncoding[char] || "?";
+    }).join(" ");
 }
 
-export function tapirDecrypt(text: string) {
-    let result = "";
-    for (let i = 0; i < text.length; i += 2) {
-        const num = parseInt(text.substr(i, 2), 10) - 1;
-        if (num < 0 || num >= tapirTable.length) {
-            result += text.substr(i, 2);
-        } else {
-            result += tapirTable[num];
-        }
-    }
-    return result;
+export function tapirDecrypt(code: string): string {
+    return code.split(" ").map(part => {
+        if (part === tapirEncoding["Leerzeichen"]) return " ";
+        return tapirDecoding[part] || "?";
+    }).join("");
 }

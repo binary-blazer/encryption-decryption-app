@@ -256,22 +256,29 @@ function App() {
                                 </div>
                             </motion.div>
                         )}
-                        {encryptionMethod === "Tapir" && (
+                        {encryptionMethod === "Tapir" && (<>
                             <motion.div
                                 key="Tapir"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                             >
-                                <div className="tapir-table">
-                                    {tapirEncrypt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789").match(/.{1,2}/g)?.map((num, i) => (
-                                        <div key={i} className="tapir-cell">
-                                            {num}
-                                        </div>
-                                    ))}
-                                </div>
+                                <p>
+                                    If there is a <code>?</code> in the output, it might be a umlaut like <code>ä</code>, <code>ö</code>, <code>ü</code> or <code>ß</code>.
+                                </p>
                             </motion.div>
-                        )}
+                            <motion.div
+                            key="Tapir"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                        >
+                            <p>
+                                <code style={{ marginRight: "6px" }}>Spaces</code>
+                                between the numbers are important when decrypting.
+                            </p>
+                        </motion.div>
+                        </>)}
                         <motion.div
                             key="InputOutput"
                             initial={{ opacity: 0, y: 20 }}
