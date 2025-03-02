@@ -147,29 +147,27 @@ const tapirTable = [
     ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~'
 ];
 
-export function tapirEncrypt(text: string, key: string) {
+export function tapirEncrypt(text: string) {
     let result = "";
     for (let i = 0; i < text.length; i++) {
         const charIndex = tapirTable.indexOf(text[i]);
-        const keyIndex = tapirTable.indexOf(key[i % key.length]);
-        if (charIndex === -1 || keyIndex === -1) {
+        if (charIndex === -1) {
             result += text[i];
         } else {
-            result += tapirTable[(charIndex + keyIndex) % tapirTable.length];
+            result += (charIndex + 1).toString().padStart(2, '0');
         }
     }
     return result;
 }
 
-export function tapirDecrypt(text: string, key: string) {
+export function tapirDecrypt(text: string) {
     let result = "";
-    for (let i = 0; i < text.length; i++) {
-        const charIndex = tapirTable.indexOf(text[i]);
-        const keyIndex = tapirTable.indexOf(key[i % key.length]);
-        if (charIndex === -1 || keyIndex === -1) {
-            result += text[i];
+    for (let i = 0; i < text.length; i += 2) {
+        const num = parseInt(text.substr(i, 2), 10) - 1;
+        if (num < 0 || num >= tapirTable.length) {
+            result += text.substr(i, 2);
         } else {
-            result += tapirTable[(charIndex - keyIndex + tapirTable.length) % tapirTable.length];
+            result += tapirTable[num];
         }
     }
     return result;

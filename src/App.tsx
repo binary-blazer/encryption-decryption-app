@@ -43,7 +43,6 @@ function App() {
     const [numRails, setNumRails] = useState(2);
     const [vigenereKey, setVigenereKey] = useState("");
     const [polybiosKey, setPolybiosKey] = useState("");
-    const [tapirKey, setTapirKey] = useState("");
     const [bulkDecryptResults, setBulkDecryptResults] = useState("");
 
     function clearAll() {
@@ -53,7 +52,6 @@ function App() {
         setNumRails(2);
         setVigenereKey("");
         setPolybiosKey("");
-        setTapirKey("");
         setBulkDecryptResults("");
     }
 
@@ -74,7 +72,7 @@ function App() {
                 result = polybiosEncrypt(inputText, polybiosMatrix);
                 break;
             case "Tapir":
-                result = tapirEncrypt(inputText, tapirKey);
+                result = tapirEncrypt(inputText);
                 break;
             default:
                 result = inputText;
@@ -99,7 +97,7 @@ function App() {
                 result = polybiosDecrypt(inputText, polybiosMatrix);
                 break;
             case "Tapir":
-                result = tapirDecrypt(inputText, tapirKey);
+                result = tapirDecrypt(inputText);
                 break;
             default:
                 result = inputText;
@@ -265,14 +263,12 @@ function App() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                             >
-                                <div className="vigenere-key-selector">
-                                    <label htmlFor="tapir-key">Key:</label>
-                                    <input
-                                        id="tapir-key"
-                                        type="text"
-                                        value={tapirKey}
-                                        onChange={(e) => setTapirKey(e.target.value)}
-                                    />
+                                <div className="tapir-table">
+                                    {tapirEncrypt("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789").match(/.{1,2}/g)?.map((num, i) => (
+                                        <div key={i} className="tapir-cell">
+                                            {num}
+                                        </div>
+                                    ))}
                                 </div>
                             </motion.div>
                         )}
